@@ -1,6 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/src/components/ui/button";
@@ -21,6 +23,7 @@ import {
   FormMessage,
 } from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
+import { authClient } from "@/src/lib/auth-client";
 
 const formSchema = z.object({
   email: z.email("Email inválido").trim(),
@@ -30,6 +33,7 @@ const formSchema = z.object({
 type formValues = z.infer<typeof formSchema>;
 
 export function SignInForm() {
+  const router = useRouter();
   const form = useForm<formValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,8 +42,30 @@ export function SignInForm() {
     },
   });
 
-  const onSubmit = (data: formValues) => {
-    console.log(data);
+  const onSubmit = async (value: formValues) => {
+    await authClient.signIn.email({
+      email: value?.email,
+      password: value?.password,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Login realizado com sucesso");
+          router.push("/");
+        },
+        onError: (ctx) => {
+          console.log(ctx);
+          if (ctx.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+            toast.error("Email ou senha inválidos");
+            form.setError("email", {
+              message: "Email ou senha inválidos",
+            });
+            form.setError("password", {
+              message: "Email ou senha inválidos",
+            });
+            return;
+          }
+        },
+      },
+    });
   };
 
   return (
@@ -88,7 +114,9 @@ export function SignInForm() {
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit">Entrar</Button>
+            <Button disabled={form.formState.isSubmitting} type="submit">
+              {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
+            </Button>
           </CardFooter>
         </form>
       </Form>

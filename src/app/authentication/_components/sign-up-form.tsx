@@ -64,16 +64,17 @@ export function SignUpForm() {
           toast.success("Conta criada com sucesso");
           router.push("/");
         },
-        onError: (error) => {
-          console.log(error.error);
-          if (error.error.code === "USER_ALREADY_EXISTS") {
+        onError: (ctx) => {
+          console.log(ctx);
+          if (ctx.error.code === "USER_ALREADY_EXISTS") {
             toast.error("Email já cadastrado.");
             form.setError("email", {
               message: "Email já cadastrado.",
             });
+            return;
           }
 
-          toast.error(error.error.message);
+          toast.error(ctx.error.message);
         },
       },
     });

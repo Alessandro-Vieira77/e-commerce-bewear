@@ -1,6 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/src/components/ui/button";
@@ -21,6 +23,7 @@ import {
   FormMessage,
 } from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
+import { authClient } from "@/src/lib/auth-client";
 
 const formSchema = z
   .object({
@@ -39,6 +42,8 @@ const formSchema = z
 type formValues = z.infer<typeof formSchema>;
 
 export function SignUpForm() {
+  const router = useRouter();
+
   const form = useForm<formValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,8 +54,29 @@ export function SignUpForm() {
     },
   });
 
-  const onSubmit = (data: formValues) => {
-    console.log(data);
+  const onSubmit = async (values: formValues) => {
+    await authClient.signUp.email({
+      email: values?.email,
+      password: values?.password,
+      name: values?.name,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Conta criada com sucesso");
+          router.push("/");
+        },
+        onError: (error) => {
+          console.log(error.error);
+          if (error.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("Email já cadastrado.");
+            form.setError("email", {
+              message: "Email já cadastrado.",
+            });
+          }
+
+          toast.error(error.error.message);
+        },
+      },
+    });
   };
 
   return (
@@ -131,7 +157,9 @@ export function SignUpForm() {
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit">Criar Conta</Button>
+            <Button disabled={form.formState.isSubmitting} type="submit">
+              {form.formState.isSubmitting ? "Criando..." : "Criar Conta"}
+            </Button>
           </CardFooter>
         </form>
       </Form>

@@ -43,6 +43,7 @@ export function SignInForm() {
   });
 
   const onSubmit = async (value: formValues) => {
+    console.log(value);
     await authClient.signIn.email({
       email: value?.email,
       password: value?.password,
@@ -65,6 +66,12 @@ export function SignInForm() {
           }
         },
       },
+    });
+  };
+
+  const handleSignInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
     });
   };
 
@@ -113,9 +120,22 @@ export function SignInForm() {
               )}
             />
           </CardContent>
-          <CardFooter>
-            <Button disabled={form.formState.isSubmitting} type="submit">
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+              type="submit"
+            >
               {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
+            </Button>
+            <Button
+              disabled={form.formState.isSubmitting}
+              type="button"
+              onClick={handleSignInWithGoogle}
+              variant="outline"
+              className="w-full"
+            >
+              {form.formState.isSubmitting ? "Entrando..." : "Google"}
             </Button>
           </CardFooter>
         </form>

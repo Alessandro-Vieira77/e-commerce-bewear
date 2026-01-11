@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import { Header } from "@/src/components/common/header";
 
+import { BrandsList } from "../components/common/brands-list";
 import CategorySelector from "../components/common/category-selector";
 import Footer from "../components/common/footer";
 import { ProductList } from "../components/common/product-list";
@@ -39,6 +40,8 @@ export default async function Home() {
             className="h-auto w-full"
           />
         </div>
+
+        <BrandsList />
 
         <ProductList title="Mais Vendidos" products={products} />
 

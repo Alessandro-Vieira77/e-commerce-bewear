@@ -5,7 +5,13 @@ import { useState } from "react";
 
 import { Button } from "@/src/components/ui/button";
 
-const QuantitySelector = () => {
+import { AddToCartButton } from "./add-to-cart-button";
+
+interface ProductActionsProps {
+  productVariantId: string;
+}
+
+export const ProductActions = ({ productVariantId }: ProductActionsProps) => {
   const [quantity, setQuantity] = useState(1);
 
   const handleDecrement = () => {
@@ -18,7 +24,7 @@ const QuantitySelector = () => {
 
   return (
     <>
-      <div>
+      <div className="px-5">
         <div className="space-y-4">
           <h3 className="font-medium">Quantidade</h3>
           <div className="flex w-[100px] items-center justify-between rounded-lg border">
@@ -32,8 +38,15 @@ const QuantitySelector = () => {
           </div>
         </div>
       </div>
+      <div className="flex flex-col space-y-4 px-5">
+        <AddToCartButton
+          productVariantId={productVariantId}
+          quantity={quantity}
+        />
+        <Button className="rounded-full" size="lg">
+          Comprar agora
+        </Button>
+      </div>
     </>
   );
 };
-
-export default QuantitySelector;

@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/src/components/ui/button";
@@ -15,6 +16,7 @@ import {
   FormMessage,
 } from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
+import { useAddAddress } from "@/src/hooks/mutations/use-add-address";
 
 const addressFormSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -33,6 +35,8 @@ const addressFormSchema = z.object({
 type AddressFormValues = z.infer<typeof addressFormSchema>;
 
 export const AddressForm = () => {
+  const { mutate: addAddress, isPending } = useAddAddress();
+
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
@@ -51,7 +55,32 @@ export const AddressForm = () => {
   });
 
   function onSubmit(values: AddressFormValues) {
-    console.log(values);
+    addAddress(
+      {
+        recipientName: values.fullName,
+        street: values.address,
+        number: values.number,
+        complement: values.complement,
+        city: values.city,
+        state: values.state,
+        neighborhood: values.neighborhood,
+        zipCode: values.cep,
+        phone: values.cellphone,
+        email: values.email,
+        cpfOrCnpj: values.cpfCnpj,
+        country: "Brasil",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Endereço adicionado com sucesso!");
+          form.reset();
+        },
+        onError: (error) => {
+          toast.error("Erro ao adicionar endereço.");
+          console.error(error);
+        },
+      },
+    );
   }
 
   return (
@@ -235,8 +264,8 @@ export const AddressForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full">
-          Salvar Endereço
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Salvando..." : "Salvar Endereço"}
         </Button>
       </form>
     </Form>

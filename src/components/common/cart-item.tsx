@@ -3,6 +3,7 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
+import { decreaseCartProductQuantity } from "@/src/actions/decrease-cart-product-quantity";
 import { removeProductFromCart } from "@/src/actions/remove-crt-product";
 import { Button } from "@/src/components/ui/button";
 import { formatInCentToBRL } from "@/src/helpers/money";
@@ -33,6 +34,18 @@ const CartItem = ({
     },
   });
 
+  const DecreaseCartProductQuantity = useMutation({
+    mutationKey: ["decrease-cart-product-quantity"],
+    mutationFn: () => decreaseCartProductQuantity({ cartItemId: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Erro ao diminuir quantidade do produto");
+    },
+  });
+
   const handleDeleteClick = () => {
     RemoveProductFromCart.mutate(undefined, {
       onSuccess: () => {
@@ -41,6 +54,15 @@ const CartItem = ({
       onError: (error) => {
         console.error(error);
         toast.error("Erro ao remover produto do carrinho");
+      },
+    });
+  };
+
+  const handleDecreaseQuantityClick = () => {
+    DecreaseCartProductQuantity.mutate(undefined, {
+      onError: (error) => {
+        console.error(error);
+        toast.error("Erro ao diminuir quantidade do produto");
       },
     });
   };
@@ -61,7 +83,11 @@ const CartItem = ({
             {productVariantName}
           </p>
           <div className="flex w-[85px] items-center justify-between rounded-lg border p-1">
-            <Button className="h-4 w-4" variant="ghost" onClick={() => {}}>
+            <Button
+              className="h-4 w-4"
+              variant="ghost"
+              onClick={handleDecreaseQuantityClick}
+            >
               <MinusIcon />
             </Button>
             <p className="text-xs font-medium">{quantity}</p>

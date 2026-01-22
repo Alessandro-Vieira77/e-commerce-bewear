@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { addProductToCart } from "@/src/actions/add-cart-product";
 import { Button } from "@/src/components/ui/button";
@@ -20,11 +21,16 @@ export const AddToCartButton = ({
     mutationKey: ["addProductToCart", productVariantId, quantity],
     mutationFn: () =>
       addProductToCart({
-        variantId: productVariantId,
-        quantity: String(quantity),
+        productVariantId,
+        quantity,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      toast("Produto adicionado à sacola");
+    },
+    onError: (error) => {
+      toast("Erro ao adicionar produto à sacola");
+      console.error(error);
     },
   });
   return (

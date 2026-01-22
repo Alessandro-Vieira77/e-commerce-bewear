@@ -3,63 +3,57 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { db } from "../../db";
-import { cartItemTable, cartTable } from "../../db/schema";
-import { auth } from "../../lib/auth";
-import { AddCartProductSchema, addCartProductSchema } from "./schema";
+import { db } from "@/src/db";
+import { cartItemTable, cartTable } from "@/src/db/schema";
+import { auth } from "@/src/lib/auth";
 
-export const addProductToCart = async (data: AddCartProductSchema) => {
-  addCartProductSchema.parse(data);
+import { AddProductToCartSchema, addProductToCartSchema } from "./schema";
 
+export const addProductToCart = async (data: AddProductToCartSchema) => {
+  addProductToCartSchema.parse(data);
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-
   const productVariant = await db.query.productVariantTable.findFirst({
-    where: (productVariant, { eq }) => eq(productVariant.id, data.variantId),
+    where: (productVariant, { eq }) =>
+      eq(productVariant.id, data.productVariantId),
   });
-
   if (!productVariant) {
     throw new Error("Product variant not found");
   }
-
   const cart = await db.query.cartTable.findFirst({
-    where: eq(cartTable.userId, session.user.id),
+    where: (cart, { eq }) => eq(cart.userId, session.user.id),
   });
-
   let cartId = cart?.id;
   if (!cartId) {
-    const [cart] = await db
+    const [newCart] = await db
       .insert(cartTable)
       .values({
         userId: session.user.id,
       })
       .returning();
-    cartId = cart?.id;
+    cartId = newCart.id;
   }
-
   const cartItem = await db.query.cartItemTable.findFirst({
     where: (cartItem, { eq }) =>
       eq(cartItem.cartId, cartId) &&
-      eq(cartItem.productVariantId, data.variantId),
+      eq(cartItem.productVariantId, data.productVariantId),
   });
-
   if (cartItem) {
     await db
       .update(cartItemTable)
       .set({
-        quantity: cartItem.quantity + Number(data.quantity),
+        quantity: cartItem.quantity + data.quantity,
       })
       .where(eq(cartItemTable.id, cartItem.id));
+    return;
   }
-
   await db.insert(cartItemTable).values({
     cartId,
-    productVariantId: data.variantId,
-    quantity: Number(data.quantity),
+    productVariantId: data.productVariantId,
+    quantity: data.quantity,
   });
 };

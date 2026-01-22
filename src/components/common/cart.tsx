@@ -49,6 +49,7 @@ export const Cart = () => {
                     productVariantPriceInCents={
                       item.productVariant.priceInCents
                     }
+                    productVariantId={item.productVariant.id}
                     quantity={item.quantity}
                   />
                 ))}

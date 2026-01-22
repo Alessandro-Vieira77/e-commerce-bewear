@@ -3,8 +3,9 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
+import { addProductToCart } from "@/src/actions/add-cart-product";
 import { decreaseCartProductQuantity } from "@/src/actions/decrease-cart-product-quantity";
-import { removeProductFromCart } from "@/src/actions/remove-crt-product";
+import { removeProductFromCart } from "@/src/actions/remove-cart-product";
 import { Button } from "@/src/components/ui/button";
 import { formatInCentToBRL } from "@/src/helpers/money";
 
@@ -14,11 +15,13 @@ interface CartItemProps {
   productVariantName: string;
   productVariantImageUrl: string;
   productVariantPriceInCents: number;
+  productVariantId: string;
   quantity: number;
 }
 
 const CartItem = ({
   id,
+  productVariantId,
   productName,
   productVariantName,
   productVariantImageUrl,
@@ -46,6 +49,18 @@ const CartItem = ({
     },
   });
 
+  const IncreaseCartProductQuantity = useMutation({
+    mutationKey: ["increase-cart-product-quantity"],
+    mutationFn: () => addProductToCart({ productVariantId, quantity: 1 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Erro ao aumentar quantidade do produto");
+    },
+  });
+
   const handleDeleteClick = () => {
     RemoveProductFromCart.mutate(undefined, {
       onSuccess: () => {
@@ -63,6 +78,15 @@ const CartItem = ({
       onError: (error) => {
         console.error(error);
         toast.error("Erro ao diminuir quantidade do produto");
+      },
+    });
+  };
+
+  const handleIncreaseQuantityClick = () => {
+    IncreaseCartProductQuantity.mutate(undefined, {
+      onError: (error) => {
+        console.error(error);
+        toast.error("Erro ao aumentar quantidade do produto");
       },
     });
   };
@@ -91,7 +115,11 @@ const CartItem = ({
               <MinusIcon />
             </Button>
             <p className="text-xs font-medium">{quantity}</p>
-            <Button className="h-4 w-4" variant="ghost" onClick={() => {}}>
+            <Button
+              className="h-4 w-4"
+              variant="ghost"
+              onClick={handleIncreaseQuantityClick}
+            >
               <PlusIcon />
             </Button>
           </div>

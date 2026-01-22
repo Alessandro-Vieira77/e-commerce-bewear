@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-export const addCartProductSchema = z.object({
-  variantId: z.uuid(),
-  quantity: z.string().min(1),
+export const addProductToCartSchema = z.object({
+  productVariantId: z.uuid(),
+  quantity: z.number().min(1),
 });
 
-export type AddCartProductSchema = z.infer<typeof addCartProductSchema>;
+export type AddProductToCartSchema = z.infer<typeof addProductToCartSchema>;

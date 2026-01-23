@@ -34,7 +34,11 @@ const addressFormSchema = z.object({
 
 type AddressFormValues = z.infer<typeof addressFormSchema>;
 
-export const AddressForm = () => {
+interface AddressFormProps {
+  onSuccess?: (addressId: string) => void;
+}
+
+export const AddressForm = ({ onSuccess }: AddressFormProps) => {
   const { mutate: addAddress, isPending } = useAddAddress();
 
   const form = useForm<AddressFormValues>({
@@ -71,9 +75,10 @@ export const AddressForm = () => {
         country: "Brasil",
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast.success("Endereço adicionado com sucesso!");
           form.reset();
+          onSuccess?.(data.id);
         },
         onError: (error) => {
           toast.error("Erro ao adicionar endereço.");

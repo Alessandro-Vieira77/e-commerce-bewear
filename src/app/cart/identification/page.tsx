@@ -20,7 +20,15 @@ export default async function CartIndetificationPage() {
     where: (cart, { eq }) => eq(cart.userId, session.user.id),
     with: {
       shippingAddress: true,
-      items: true,
+      items: {
+        with: {
+          productVariant: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -36,7 +44,10 @@ export default async function CartIndetificationPage() {
     <>
       <Header />
       <div className="px-5">
-        <Addresses shippingAddresses={shippingAddresses} />
+        <Addresses
+          shippingAddresses={shippingAddresses}
+          defaultShippingAddressId={cart.shippingAddress?.id || null}
+        />
       </div>
     </>
   );

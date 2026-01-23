@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,19 +14,44 @@ import { Label } from "@/src/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
 import { shippingAddressTable } from "@/src/db/schema";
+import { useUpdateCartShippingAddress } from "@/src/hooks/mutations/use-update-cart-shipping-address";
 import { useUserAddresses } from "@/src/hooks/queries/use-user-addresses";
 
 import { AddressForm } from "./address-form";
 
 interface AddressesProps {
   shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
+  defaultShippingAddressId?: string | null;
 }
 
-export const Addresses = ({ shippingAddresses }: AddressesProps) => {
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+export const Addresses = ({
+  shippingAddresses,
+  defaultShippingAddressId,
+}: AddressesProps) => {
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(
+    defaultShippingAddressId || null,
+  );
   const { data: addresses } = useUserAddresses({
     initialData: shippingAddresses,
   });
+
+  const { mutate: updateCartShippingAddress, isPending } =
+    useUpdateCartShippingAddress();
+
+  const handleLinkAddress = (addressId: string) => {
+    updateCartShippingAddress(
+      { shippingAddressId: addressId },
+      {
+        onSuccess: () => {
+          toast.success("Endereço vinculado ao carrinho!");
+          setSelectedAddress(addressId);
+        },
+        onError: () => {
+          toast.error("Erro ao vincular endereço.");
+        },
+      },
+    );
+  };
 
   return (
     <Card>
@@ -97,7 +124,21 @@ export const Addresses = ({ shippingAddresses }: AddressesProps) => {
           </ScrollArea>
         </RadioGroup>
 
-        {selectedAddress === "add-new" && <AddressForm />}
+        {selectedAddress === "add-new" && (
+          <AddressForm onSuccess={handleLinkAddress} />
+        )}
+
+        {selectedAddress && selectedAddress !== "add-new" && (
+          <div className="pt-4">
+            <Button
+              className="w-full"
+              onClick={() => handleLinkAddress(selectedAddress)}
+              disabled={isPending}
+            >
+              {isPending ? "Salvando..." : "Ir para pagamento"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

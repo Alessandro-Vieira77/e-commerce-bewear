@@ -11,13 +11,20 @@ import {
 import { Label } from "@/src/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { shippingAddressTable } from "@/src/db/schema";
 import { useUserAddresses } from "@/src/hooks/queries/use-user-addresses";
 
 import { AddressForm } from "./address-form";
 
-export const Addresses = () => {
+interface AddressesProps {
+  shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
+}
+
+export const Addresses = ({ shippingAddresses }: AddressesProps) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const { data: addresses } = useUserAddresses();
+  const { data: addresses } = useUserAddresses({
+    initialData: shippingAddresses,
+  });
 
   return (
     <Card>

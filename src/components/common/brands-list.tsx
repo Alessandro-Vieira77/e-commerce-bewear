@@ -26,7 +26,7 @@ export function BrandsList() {
     <div className="w-full space-y-6">
       <h3 className="px-5 font-semibold">Marcas parceiras</h3>
 
-      <div className="flex w-full items-center gap-4 overflow-x-auto px-5 py-1 [&::-webkit-scrollbar]:hidden">
+      <div className="flex w-full items-center gap-6 overflow-x-auto px-5 py-1 [&::-webkit-scrollbar]:hidden">
         {brands.map((brand) => (
           <div key={brand.name} className="flex flex-col items-center gap-2">
             <div className="flex h-20 min-w-20 items-center justify-center rounded-2xl bg-white shadow-sm">

@@ -4,7 +4,6 @@ import {
   LogInIcon,
   LogOutIcon,
   MenuIcon,
-  ShoppingBag,
   TruckIcon,
 } from "lucide-react";
 import Link from "next/link";

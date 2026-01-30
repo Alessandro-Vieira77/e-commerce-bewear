@@ -44,6 +44,12 @@ export const Menu = () => {
     });
   };
 
+  const handleSignInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+    });
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -79,23 +85,11 @@ export const Menu = () => {
                     </span>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => authClient.signOut()}
-                >
-                  <LogOutIcon />
-                </Button>
               </div>
             </>
           ) : (
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Olá. Faça seu login!</h2>
-              <Button size="icon" asChild variant="outline">
-                <Link href="/authentication">
-                  <LogInIcon />
-                </Link>
-              </Button>
             </div>
           )}
         </div>
@@ -124,16 +118,29 @@ export const Menu = () => {
         <div className="px-5">
           <Separator />
         </div>
-        <div className="w-full px-3">
-          <Button
-            variant="ghost"
-            className="text-muted-foreground font-regular"
-            onClick={handleLogout}
-          >
-            <LogOutIcon size={16} />
-            Logout
-          </Button>
-        </div>
+        {session?.user ? (
+          <div className="w-full px-3">
+            <Button
+              variant="ghost"
+              className="text-muted-foreground font-regular"
+              onClick={handleLogout}
+            >
+              <LogOutIcon size={16} />
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <div className="w-full px-3">
+            <Button
+              variant="ghost"
+              className="text-muted-foreground font-regular"
+              onClick={handleSignInWithGoogle}
+            >
+              <LogInIcon size={16} />
+              Login
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

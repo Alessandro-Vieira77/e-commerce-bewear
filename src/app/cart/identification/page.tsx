@@ -50,6 +50,7 @@ const IdentificationPage = async () => {
         <Addresses
           shippingAddresses={shippingAddresses}
           defaultShippingAddressId={cart.shippingAddress?.id || null}
+          route="/cart/confirmation"
         />
         <CartSummary
           subtotalInCents={cartTotalInCents}

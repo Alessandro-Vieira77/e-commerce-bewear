@@ -2,20 +2,27 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import FinishOrderButton from "@/src/app/cart/confirmation/components/finish-order-button";
+import { formatAddress } from "@/src/app/cart/helpers/address";
 import Footer from "@/src/components/common/footer";
 import { Header } from "@/src/components/common/header";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { db } from "@/src/db";
-import { productVariantTable, shippingAddressTable } from "@/src/db/schema";
+import { productVariantTable } from "@/src/db/schema";
 import { auth } from "@/src/lib/auth";
 
-import { Addresses } from "../../../app/cart/identification/components/addresses";
-import CartSummaryOne from "../components/cartSummaryOne";
+import CartSummaryOne from "../../identification/components/cartSummaryOne";
 
-interface IdentificationPageProps {
+interface ConfirmationPageProps {
   params: Promise<{ id: string }>;
 }
 
-const IdentificationPage = async ({ params }: IdentificationPageProps) => {
+const ConfirmationPage = async ({ params }: ConfirmationPageProps) => {
   const { id } = await params;
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -50,19 +57,27 @@ const IdentificationPage = async ({ params }: IdentificationPageProps) => {
   if (!cart || cart?.items.length === 0) {
     redirect("/");
   }
-  const shippingAddresses = await db.query.shippingAddressTable.findMany({
-    where: eq(shippingAddressTable.userId, session.user.id),
-  });
   const cartTotalInCents = product.priceInCents;
+  if (!cart.shippingAddress) {
+    redirect("/cart/identification");
+  }
   return (
-    <div>
+    <div className="flex min-h-screen flex-col">
       <Header />
       <div className="space-y-4 px-5">
-        <Addresses
-          shippingAddresses={shippingAddresses}
-          defaultShippingAddressId={cart.shippingAddress?.id || null}
-          route={`/confirmation/${id}`}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Identificação</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Card>
+              <CardContent>
+                <p className="text-sm">{formatAddress(cart.shippingAddress)}</p>
+              </CardContent>
+            </Card>
+            <FinishOrderButton />
+          </CardContent>
+        </Card>
         <CartSummaryOne
           subtotalInCents={cartTotalInCents}
           totalInCents={cartTotalInCents}
@@ -76,11 +91,11 @@ const IdentificationPage = async ({ params }: IdentificationPageProps) => {
           }}
         />
       </div>
-      <div className="mt-12">
+      <div className="mt-auto">
         <Footer />
       </div>
     </div>
   );
 };
 
-export default IdentificationPage;
+export default ConfirmationPage;

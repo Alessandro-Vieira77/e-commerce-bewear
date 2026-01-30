@@ -23,11 +23,13 @@ import { AddressForm } from "./address-form";
 interface AddressesProps {
   shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
   defaultShippingAddressId?: string | null;
+  route: string;
 }
 
 export const Addresses = ({
   shippingAddresses,
   defaultShippingAddressId,
+  route,
 }: AddressesProps) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(
     defaultShippingAddressId || null,
@@ -46,12 +48,12 @@ export const Addresses = ({
       { shippingAddressId: addressId },
       {
         onSuccess: () => {
-          toast.success("Endereço vinculado ao carrinho!");
-          router.push("/cart/confirmation");
+          toast.success("Confira seu pedido");
+          router.push(route);
           setSelectedAddress(addressId);
         },
         onError: () => {
-          toast.error("Erro ao vincular endereço.");
+          toast.error("Erro ao confirmar pedido.");
         },
       },
     );

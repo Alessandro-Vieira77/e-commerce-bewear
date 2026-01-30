@@ -1,9 +1,15 @@
+import Link from "next/link";
+
 import { Button } from "@/src/components/ui/button";
 
-export const BuyProduct = () => {
+interface BuyProductProps {
+  productVariantId: string;
+}
+
+export const BuyProduct = ({ productVariantId }: BuyProductProps) => {
   return (
     <Button className="rounded-full" size="lg">
-      Comprar agora
+      <Link href={`/identification/${productVariantId}`}>Comprar agora</Link>
     </Button>
   );
 };
